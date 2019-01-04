@@ -1,0 +1,39 @@
+syntax = "proto3";
+package api;
+
+message SurveyMessage {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  repeated Topic topic = 4;
+  repeated string options = 5;
+}
+
+message Topic {
+  string label = 1;
+}
+
+message SurveyResponse {
+  int32 id = 1;
+  bool success = 2;
+}
+
+service Survey {
+  rpc CreateSurvey(SurveyMessage) returns (SurveyResponse) {}
+  rpc GetSurveys(Topic) returns (stream SurveyMessage) {}
+}
+
+message VoteMessage {
+  string vote = 1;
+  string survey = 2;
+}
+
+message VoteResponse {
+  string vote = 1;
+  string survey = 2;
+  string success = 3;
+}
+
+service Vote {
+  rpc Vote(VoteMessage) returns (VoteResponse){}
+}
