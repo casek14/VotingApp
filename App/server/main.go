@@ -23,6 +23,8 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	api.RegisterSurveyServer(grpcServer, &surveyServer{})
+	api.RegisterVoteServer(grpcServer, &voteServer{})
+
 	fmt.Printf("Listening on port *%v \n",port)
 
 	grpcServer.Serve(lis)
