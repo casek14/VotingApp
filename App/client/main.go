@@ -1,7 +1,7 @@
 package main
 
 import (
-	"VotingApp/protocolBuffers/api"
+	"VotingApp/App/protocolBuffers/api"
 	"context"
 	"log"
 	"io"
@@ -74,6 +74,7 @@ func main() {
 			&api.Topic{Label:"general election"},
 		},
 		Options:[]string{"Zeman","Horacek", "Fikus"},
+		Action:api.SurveyMessage_CREATE,
 
 	}
 	CreateSurvey(client, &survey1)
@@ -86,7 +87,7 @@ func main() {
 			&api.Topic{Label:"color"},
 		},
 		Options:[]string{"Green","Blue", "Yellow", "Pink", "Red", "White", "Black"},
-
+		Action:api.SurveyMessage_CREATE,
 	}
 	CreateSurvey(client, &survey2)
 
