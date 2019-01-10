@@ -2,58 +2,18 @@ package main
 
 import (
 	"VotingApp/App/protocolBuffers/api"
-	"context"
 	"log"
-	"io"
 	"google.golang.org/grpc"
+	"math/rand"
+	"time"
+	"context"
 )
 
 const (
 	address = ":50051"
 )
 
-func CreateSurvey(client api.SurveyClient, survey *api.SurveyMessage){
-	resp, err := client.CreateSurvey(context.Background(), survey)
-	if err != nil {
-		log.Fatalf("Cannot create Survey: %v\n", err)
-	}
 
-	if resp.Success{
-		log.Printf("New survey with id: %v , was created. \n", resp.Id)
-	}
-}
-
-
-func GetSurveys(client api.SurveyClient, label *api.Topic){
-
-	stream, err := client.GetSurveys(context.Background(), label)
-	if err != nil {
-		log.Fatalf("Error in getting survey: %v\n",err)
-	}
-
-	log.Println("********** List of surveys **********")
-	index := 1
-	for {
-		survey, err := stream.Recv()
-
-
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatalf("%v,GetCustomers(_) = _,%v\n", client, err)
-		}
-
-		log.Printf("%v. %v\n",index,survey.Name)
-		log.Println("With options:")
-		for _, t := range survey.Options{
-			log.Printf("- %v\n",t)
-		}
-		log.Println("---------------------------------------")
-		index ++
-
-	}
-}
 
 func main() {
 
@@ -63,8 +23,9 @@ func main() {
 	}
 
 	defer conn.Close()
-	client := api.NewSurveyClient(conn)
+	surveyClient := api.NewSurveyClient(conn)
 
+	// create surveys
 	survey1 := api.SurveyMessage{
 		Id: 101,
 		Name: "Presidential election 2018",
@@ -77,7 +38,7 @@ func main() {
 		Action:api.SurveyMessage_CREATE,
 
 	}
-	CreateSurvey(client, &survey1)
+	CreateSurvey(surveyClient, &survey1)
 
 	survey2 := api.SurveyMessage{
 		Id: 102,
@@ -89,8 +50,20 @@ func main() {
 		Options:[]string{"Green","Blue", "Yellow", "Pink", "Red", "White", "Black"},
 		Action:api.SurveyMessage_CREATE,
 	}
-	CreateSurvey(client, &survey2)
+	CreateSurvey(surveyClient, &survey2)
 
 	t := api.Topic{Label:""}
-	GetSurveys(client, &t)
+	surveys := GetSurveys(surveyClient, &t)
+
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	//send votes
+	voteClient := api.NewVoteClient(conn)
+	for _,s := range surveys{
+
+		index := r1.Intn(len(s.Options) - 1)
+		option := s.Options[index]
+		v := &api.VoteMessage{Vote: option, SurveyId:s.Id}
+		Vote(context.Background(),voteClient, v)
+	}
 }
