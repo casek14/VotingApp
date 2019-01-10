@@ -7,6 +7,13 @@ message SurveyMessage {
   string description = 3;
   repeated Topic topic = 4;
   repeated string options = 5;
+  enum Action {
+      CREATE = 0;
+      END = 1;
+      DELETE = 2;
+  }
+
+  Action action = 6;
 }
 
 message Topic {
@@ -23,17 +30,17 @@ service Survey {
   rpc GetSurveys(Topic) returns (stream SurveyMessage) {}
 }
 
+
+service Vote{
+  rpc Vote(VoteMessage) returns (VoteResponse){}
+}
+
 message VoteMessage {
   string vote = 1;
-  string survey = 2;
+  string surveyId = 2;
 }
 
 message VoteResponse {
-  string vote = 1;
-  string survey = 2;
-  string success = 3;
+  bool success = 1;
 }
 
-service Vote {
-  rpc Vote(VoteMessage) returns (VoteResponse){}
-}
