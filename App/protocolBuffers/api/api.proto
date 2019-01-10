@@ -37,7 +37,7 @@ service Vote{
 
 message VoteMessage {
   string vote = 1;
-  string surveyId = 2;
+  int32 surveyId = 2;
 }
 
 message VoteResponse {
